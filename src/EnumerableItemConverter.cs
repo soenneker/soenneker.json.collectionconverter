@@ -6,7 +6,7 @@ using Soenneker.Json.CollectionConverter.Base;
 
 namespace Soenneker.Json.CollectionConverter;
 
-public sealed class EnumerableItemConverter<TEnumerable, TItem, TItemConverter> : CollectionItemConverterBase<TEnumerable, TItem, TItemConverter> where TEnumerable : IEnumerable<TItem> where TItemConverter : JsonConverter
+public sealed class EnumerableItemConverter<TEnumerable, TItem, TItemConverter> : CollectionItemConverterBase<TEnumerable, TItem, TItemConverter> where TEnumerable : IEnumerable<TItem> where TItemConverter : JsonConverter, new()
 {
     public EnumerableItemConverter(JsonSerializerOptions options, TItemConverter converter) : base(options, converter)
     {

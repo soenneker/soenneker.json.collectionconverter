@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Soenneker.Json.CollectionConverter.Base;
 
-public abstract class CollectionItemConverterBase<TEnumerable, TItem, TItemConverter> : JsonConverter<TEnumerable> where TEnumerable : IEnumerable<TItem> where TItemConverter : JsonConverter
+public abstract class CollectionItemConverterBase<TEnumerable, TItem, TItemConverter> : JsonConverter<TEnumerable> where TEnumerable : IEnumerable<TItem> where TItemConverter : JsonConverter, new()
 {
     private readonly JsonSerializerOptions _modifiedOptions;
 
