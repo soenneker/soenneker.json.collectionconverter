@@ -33,13 +33,12 @@ public class CollectionConverter<TItemConverter> : JsonConverterFactory where TI
 
         if (isArray)
         {
-            return (JsonConverter) Activator.CreateInstance(typeof(ArrayItemConverter<,>).MakeGenericType(typeof(TItemConverter), itemType), options, _itemConverter)!;
+            return (JsonConverter) Activator.CreateInstance(typeof(ArrayItemConverter<>).MakeGenericType(typeof(TItemConverter), itemType), options, _itemConverter)!;
         }
 
         if (!typeToConvert.IsAbstract && !typeToConvert.IsInterface && typeToConvert.GetConstructor(Type.EmptyTypes) != null)
         {
-            return (JsonConverter) Activator.CreateInstance(typeof(ConcreteCollectionItemConverter<,,,>).MakeGenericType(typeof(TItemConverter), typeToConvert, typeToConvert, itemType), options,
-                _itemConverter)!;
+            return (JsonConverter) Activator.CreateInstance(typeof(ConcreteCollectionItemConverter<,,>).MakeGenericType(typeof(TItemConverter), typeToConvert, typeToConvert, itemType), options, _itemConverter)!;
         }
 
         if (isSet)
@@ -48,8 +47,7 @@ public class CollectionConverter<TItemConverter> : JsonConverterFactory where TI
 
             if (typeToConvert.IsAssignableFrom(setType))
             {
-                return (JsonConverter) Activator.CreateInstance(typeof(ConcreteCollectionItemConverter<,,,>).MakeGenericType(typeof(TItemConverter), setType, typeToConvert, itemType), options,
-                    _itemConverter)!;
+                return (JsonConverter) Activator.CreateInstance(typeof(ConcreteCollectionItemConverter<,,>).MakeGenericType(typeof(TItemConverter), setType, typeToConvert, itemType), options, _itemConverter)!;
             }
         }
         else
@@ -57,13 +55,12 @@ public class CollectionConverter<TItemConverter> : JsonConverterFactory where TI
             Type listType = typeof(List<>).MakeGenericType(itemType);
             if (typeToConvert.IsAssignableFrom(listType))
             {
-                return (JsonConverter) Activator.CreateInstance(typeof(ConcreteCollectionItemConverter<,,,>).MakeGenericType(typeof(TItemConverter), listType, typeToConvert, itemType), options,
-                    _itemConverter)!;
+                return (JsonConverter) Activator.CreateInstance(typeof(ConcreteCollectionItemConverter<,,>).MakeGenericType(typeof(TItemConverter), listType, typeToConvert, itemType), options, _itemConverter)!;
             }
         }
 
         // OK it's not an array and we can't find a parameterless constructor for the type. We can serialize, but not deserialize.
-        return (JsonConverter) Activator.CreateInstance(typeof(EnumerableItemConverter<,,>).MakeGenericType(typeof(TItemConverter), typeToConvert, itemType), options, _itemConverter)!;
+        return (JsonConverter) Activator.CreateInstance(typeof(EnumerableItemConverter<,>).MakeGenericType(typeof(TItemConverter), typeToConvert, itemType), options, _itemConverter)!;
     }
 
     private static (Type? Type, bool IsArray, bool isSet) GetItemType(Type? type)
@@ -83,7 +80,6 @@ public class CollectionConverter<TItemConverter> : JsonConverterFactory where TI
                 continue;
 
             Type genType = iType.GetGenericTypeDefinition();
-
             if (genType == typeof(ISet<>))
             {
                 isSet = true;
@@ -107,4 +103,79 @@ public class CollectionConverter<TItemConverter> : JsonConverterFactory where TI
 
         return (itemType, false, isSet);
     }
+
+    private abstract class CollectionItemConverterBase<TEnumerable, TItem> : JsonConverter<TEnumerable> where TEnumerable : IEnumerable<TItem>
+    {
+        private readonly JsonSerializerOptions _modifiedOptions;
+
+        protected CollectionItemConverterBase(JsonSerializerOptions options, TItemConverter converter)
+        {
+            // Clone the incoming options and insert the item converter at the beginning of the clone.
+            // Then if converter is actually a JsonConverterFactory (e.g. JsonStringEnumConverter) then the correct JsonConverter<T> will be manufactured or fetched.
+            _modifiedOptions = new JsonSerializerOptions(options);
+            _modifiedOptions.Converters.Insert(0, converter);
+        }
+
+        protected TCollection BaseRead<TCollection>(ref Utf8JsonReader reader) where TCollection : ICollection<TItem>, new()
+        {
+            if (reader.TokenType != JsonTokenType.StartArray)
+                throw new JsonException(); // Unexpected token type
+
+            var list = new TCollection();
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndArray)
+                    break;
+
+                list.Add(JsonSerializer.Deserialize<TItem>(ref reader, _modifiedOptions)!); // fail hard
+            }
+
+            return list;
+        }
+
+        public sealed override void Write(Utf8JsonWriter writer, TEnumerable value, JsonSerializerOptions options)
+        {
+            writer.WriteStartArray();
+
+            foreach (TItem item in value)
+            {
+                JsonSerializer.Serialize(writer, item, _modifiedOptions);
+            }
+
+            writer.WriteEndArray();
+        }
+    }
+
+    private sealed class ArrayItemConverter<TItem> : CollectionItemConverterBase<TItem[], TItem>
+    {
+        public ArrayItemConverter(JsonSerializerOptions options, TItemConverter converter) : base(options, converter)
+        {
+        }
+
+        public override TItem[] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => BaseRead<List<TItem>>(ref reader).ToArray();
+    }
+
+    private sealed class ConcreteCollectionItemConverter<TCollection, TEnumerable, TItem> : CollectionItemConverterBase<TEnumerable, TItem>
+        where TCollection : ICollection<TItem>, TEnumerable, new()
+        where TEnumerable : IEnumerable<TItem>
+    {
+        public ConcreteCollectionItemConverter(JsonSerializerOptions options, TItemConverter converter) : base(options, converter)
+        {
+        }
+
+        public override TEnumerable Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => BaseRead<TCollection>(ref reader);
+    }
+
+    private sealed class EnumerableItemConverter<TEnumerable, TItem> : CollectionItemConverterBase<TEnumerable, TItem> where TEnumerable : IEnumerable<TItem>
+    {
+        public EnumerableItemConverter(JsonSerializerOptions options, TItemConverter converter) : base(options, converter)
+        {
+        }
+
+        public override TEnumerable Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => throw new NotImplementedException(
+            $"Deserialization is not implemented for type {typeof(TEnumerable)}");
+    }
 }
+
+#nullable enable
