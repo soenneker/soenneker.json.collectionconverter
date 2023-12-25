@@ -8,5 +8,5 @@
 ## Installation
 
 ```
-Install-Package Soenneker.Json.CollectionConverter
+dotnet add package Soenneker.Json.CollectionConverter
 ```
