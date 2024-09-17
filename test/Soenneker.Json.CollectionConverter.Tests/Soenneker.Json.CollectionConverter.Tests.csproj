@@ -25,7 +25,7 @@
   </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\src\Soenneker.Json.CollectionConverter.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Json.CollectionConverter.csproj" />
     </ItemGroup>
 
 </Project>
