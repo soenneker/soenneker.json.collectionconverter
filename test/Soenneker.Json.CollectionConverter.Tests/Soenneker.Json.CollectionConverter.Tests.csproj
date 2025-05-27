@@ -10,7 +10,7 @@
     <ItemGroup>
         <PackageReference Include="AwesomeAssertions" Version="9.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
-        <PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="3.0.174" />
+        <PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="3.0.175" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
