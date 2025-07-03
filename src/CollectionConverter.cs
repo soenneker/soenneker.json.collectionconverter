@@ -11,7 +11,7 @@ namespace Soenneker.Json.CollectionConverter;
 /// <summary>
 /// A System.Text.Json converter for (de)serializing collections
 /// </summary>
-public class CollectionConverter<TItemConverter> : JsonConverterFactory where TItemConverter : JsonConverter, new()
+public sealed class CollectionConverter<TItemConverter> : JsonConverterFactory where TItemConverter : JsonConverter, new()
 {
     private readonly TItemConverter _itemConverter = new();
 
