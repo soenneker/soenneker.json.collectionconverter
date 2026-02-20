@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Soenneker.Enums.DeployEnvironment;
 using Xunit;
 
@@ -12,10 +11,10 @@ public class CollectionConverterTests
     {
         var testClass = new TestClass
         {
-            Environments = new List<DeployEnvironment> {DeployEnvironment.Local}
+            Environments = [DeployEnvironment.Local]
         };
 
-        var result = System.Text.Json.JsonSerializer.Serialize(testClass);
+        string result = System.Text.Json.JsonSerializer.Serialize(testClass);
     }
 
     [Fact]
@@ -23,9 +22,9 @@ public class CollectionConverterTests
     {
         var testClass = new TestClass
         {
-            Environments = new List<DeployEnvironment> { DeployEnvironment.Local }
+            Environments = [DeployEnvironment.Local]
         };
 
-        var result = JsonConvert.SerializeObject(testClass);
+        string result = JsonConvert.SerializeObject(testClass);
     }
 }

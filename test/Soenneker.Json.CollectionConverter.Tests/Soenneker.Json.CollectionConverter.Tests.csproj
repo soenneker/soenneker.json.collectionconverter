@@ -3,17 +3,18 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
-
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
-            <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-            <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-            <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AwesomeAssertions" Version="9.3.0" /><PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="4.0.184" /><PackageReference Include="xUnit.v3" Version="3.2.2" />
+        <PackageReference Include="AwesomeAssertions" Version="9.4.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="4.0.184" />
+        <PackageReference Include="xUnit.v3" Version="3.2.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,7 +23,7 @@
 
     <ItemGroup>
         <Content Include="testconfig.json">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 
