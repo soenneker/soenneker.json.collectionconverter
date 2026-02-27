@@ -13,7 +13,7 @@
     <ItemGroup>
         <PackageReference Include="AwesomeAssertions" Version="9.4.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-        <PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="4.0.188" />
+        <PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="4.0.189" />
         <PackageReference Include="xUnit.v3" Version="3.2.2" />
     </ItemGroup>
 
