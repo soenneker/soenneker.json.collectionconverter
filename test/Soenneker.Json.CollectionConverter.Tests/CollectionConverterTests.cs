@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Soenneker.Enums.DeployEnvironment;
-using Xunit;
 
 namespace Soenneker.Json.CollectionConverter.Tests;
 
 public class CollectionConverterTests
 {
-    [Fact]
+    [Test]
     public void Should_convert_with_systemtextjson()
     {
         var testClass = new TestClass
@@ -17,7 +16,7 @@ public class CollectionConverterTests
         string result = System.Text.Json.JsonSerializer.Serialize(testClass);
     }
 
-    [Fact]
+    [Test]
     public void Should_convert_with_jsonnet()
     {
         var testClass = new TestClass
