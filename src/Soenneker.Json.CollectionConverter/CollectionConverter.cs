@@ -18,6 +18,11 @@ public sealed class CollectionConverter<TItemConverter> : JsonConverterFactory w
     // Cache compiled factory methods for converters
     private static readonly ConcurrentDictionary<Type, Func<JsonSerializerOptions, JsonConverter>> _converterFactories = new();
 
+    /// <summary>
+    /// Executes the can convert operation.
+    /// </summary>
+    /// <param name="typeToConvert">The type to convert.</param>
+    /// <returns>A value indicating whether the operation succeeded.</returns>
     public override bool CanConvert(Type? typeToConvert)
     {
         if (typeToConvert == null)
@@ -27,6 +32,12 @@ public sealed class CollectionConverter<TItemConverter> : JsonConverterFactory w
         return itemType != null && _itemConverter.CanConvert(itemType);
     }
 
+    /// <summary>
+    /// Creates converter.
+    /// </summary>
+    /// <param name="typeToConvert">The type to convert.</param>
+    /// <param name="options">The options.</param>
+    /// <returns>The result of the operation.</returns>
     public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
         if (typeToConvert == null)
