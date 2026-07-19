@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AwesomeAssertions" Version="9.4.0" />
+        <PackageReference Include="AwesomeAssertions" Version="9.5.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="4.0.226" />
         <PackageReference Include="TUnit" Version="1.61.15" />
