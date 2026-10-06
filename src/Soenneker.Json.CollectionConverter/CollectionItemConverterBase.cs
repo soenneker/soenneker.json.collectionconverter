@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Text.Json.Serialization.Metadata;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,6 +16,8 @@ internal abstract class CollectionItemConverterBase<TEnumerable, TItem> : JsonCo
         _modifiedOptions.Converters.Insert(0, converter);
     }
 
+    private JsonTypeInfo<TItem> ItemContract => (JsonTypeInfo<TItem>)_modifiedOptions.GetTypeInfo(typeof(TItem));
+
     protected TCollection BaseRead<TCollection>(ref Utf8JsonReader reader) where TCollection : ICollection<TItem>, new()
     {
         if (reader.TokenType != JsonTokenType.StartArray)
@@ -25,12 +28,12 @@ internal abstract class CollectionItemConverterBase<TEnumerable, TItem> : JsonCo
         while (reader.Read())
         {
             if (reader.TokenType == JsonTokenType.EndArray)
-                break;
+                return list;
 
-            list.Add(JsonSerializer.Deserialize<TItem>(ref reader, _modifiedOptions)!);
+            list.Add(JsonSerializer.Deserialize(ref reader, ItemContract)!);
         }
 
-        return list;
+        throw new JsonException("The collection JSON array was not terminated.");
     }
 
     public override void Write(Utf8JsonWriter writer, TEnumerable value, JsonSerializerOptions options)
@@ -39,7 +42,7 @@ internal abstract class CollectionItemConverterBase<TEnumerable, TItem> : JsonCo
 
         foreach (TItem item in value)
         {
-            JsonSerializer.Serialize(writer, item, _modifiedOptions);
+            JsonSerializer.Serialize(writer, item, ItemContract);
         }
 
         writer.WriteEndArray();

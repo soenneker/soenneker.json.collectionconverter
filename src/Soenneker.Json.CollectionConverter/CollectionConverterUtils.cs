@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Soenneker.Extensions.Type;
@@ -7,6 +8,7 @@ namespace Soenneker.Json.CollectionConverter;
 
 internal static class CollectionConverterUtils
 {
+    [RequiresUnreferencedCode("Runtime collection discovery requires preserved interfaces.")]
     public static (Type? Type, bool IsArray, bool IsSet) GetItemType(Type? type)
     {
         // Handle invalid and primitive types early

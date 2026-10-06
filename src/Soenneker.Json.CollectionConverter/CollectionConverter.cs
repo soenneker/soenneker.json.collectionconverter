@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -14,6 +15,27 @@ namespace Soenneker.Json.CollectionConverter;
 public sealed class CollectionConverter<TItemConverter> : JsonConverterFactory where TItemConverter : JsonConverter, new()
 {
     private readonly TItemConverter _itemConverter = new();
+    private readonly Func<Type, bool> _canConvert;
+    private readonly Func<Type, JsonSerializerOptions, JsonConverter?> _createConverter;
+
+    /// <summary>Creates a reflection-based factory. Use explicit closed converter registrations when trimming.</summary>
+    [RequiresUnreferencedCode("Runtime collection discovery requires constructors and interfaces. Use the registered-factories constructor.")]
+    [RequiresDynamicCode("Runtime collection discovery constructs generic converters. Use the registered-factories constructor.")]
+    public CollectionConverter()
+    {
+        _canConvert = CanConvertViaReflection;
+        _createConverter = CreateConverterViaReflection;
+    }
+
+    /// <summary>Creates a factory from explicitly registered, statically closed converter factories.</summary>
+    public CollectionConverter(IReadOnlyDictionary<Type, Func<JsonSerializerOptions, JsonConverter>> factories)
+    {
+        ArgumentNullException.ThrowIfNull(factories);
+        var registrations = new Dictionary<Type, Func<JsonSerializerOptions, JsonConverter>>(factories);
+        _canConvert = registrations.ContainsKey;
+        _createConverter = (type, options) => registrations.TryGetValue(type, out var factory) ? factory(options) : null;
+    }
+
 
     // Cache compiled factory methods for converters
     private readonly ConcurrentDictionary<Type, Func<JsonSerializerOptions, JsonConverter>> _converterFactories = new();
@@ -23,7 +45,10 @@ public sealed class CollectionConverter<TItemConverter> : JsonConverterFactory w
     /// </summary>
     /// <param name="typeToConvert">The type to convert.</param>
     /// <returns><see langword="true"/> when this factory can create a converter for the collection; otherwise, <see langword="false"/>.</returns>
-    public override bool CanConvert(Type? typeToConvert)
+    public override bool CanConvert(Type? typeToConvert) => typeToConvert is not null && _canConvert(typeToConvert);
+
+    [RequiresUnreferencedCode("Runtime collection discovery requires preserved interfaces.")]
+    private bool CanConvertViaReflection(Type? typeToConvert)
     {
         if (typeToConvert == null)
             return false;
@@ -38,7 +63,11 @@ public sealed class CollectionConverter<TItemConverter> : JsonConverterFactory w
     /// <param name="typeToConvert">The type to convert.</param>
     /// <param name="options">The options.</param>
     /// <returns>The collection converter, or <see langword="null"/> when the type is unsupported.</returns>
-    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options) => _createConverter(typeToConvert, options);
+
+    [RequiresUnreferencedCode("Runtime collection discovery requires preserved constructors and interfaces.")]
+    [RequiresDynamicCode("Runtime collection discovery constructs generic converters.")]
+    private JsonConverter? CreateConverterViaReflection(Type typeToConvert, JsonSerializerOptions options)
     {
         if (typeToConvert == null)
             return null;
@@ -106,6 +135,7 @@ public sealed class CollectionConverter<TItemConverter> : JsonConverterFactory w
         return factoryMethod(options);
     }
 
+    [RequiresUnreferencedCode("Runtime converter creation requires preserved constructors.")]
     private Func<JsonSerializerOptions, JsonConverter> CreateFactory(Type converterType)
     {
         // Get the constructor with parameters (JsonSerializerOptions, TItemConverter)
