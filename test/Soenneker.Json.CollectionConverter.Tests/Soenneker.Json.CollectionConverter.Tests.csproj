@@ -9,7 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="AwesomeAssertions" Version="9.6.0" />
-        <PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="11.0.262" />
+        <PackageReference Include="Soenneker.Enums.DeployEnvironment" Version="11.0.264" />
         <PackageReference Include="TUnit" Version="1.83.0" />
     </ItemGroup>
 
