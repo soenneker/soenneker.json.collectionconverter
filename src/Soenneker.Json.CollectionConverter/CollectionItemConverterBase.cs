@@ -16,7 +16,7 @@ internal abstract class CollectionItemConverterBase<TEnumerable, TItem> : JsonCo
         _modifiedOptions.Converters.Insert(0, converter);
     }
 
-    private JsonTypeInfo<TItem> ItemContract => (JsonTypeInfo<TItem>)_modifiedOptions.GetTypeInfo(typeof(TItem));
+    private JsonTypeInfo<TItem> ItemContract => _modifiedOptions.GetTypeInfo<TItem>();
 
     protected TCollection BaseRead<TCollection>(ref Utf8JsonReader reader) where TCollection : ICollection<TItem>, new()
     {
